@@ -3,5 +3,11 @@
   "devCommand": "npx serve .",
   "installCommand": "npm install",
   "framework": null,
-  "outputDirectory": "."
+  "outputDirectory": ".",
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/landing.html"
+    }
+  ]
 }
