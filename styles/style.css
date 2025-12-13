@@ -11,7 +11,7 @@ body, .fantastical, .fantastical * {
 }
 
 .fantastical {
-  background-color: #ffffff;
+  background-color: #1a1a1a;
   overflow: hidden; /* container doesn't scroll */
   width: 100%;
   min-width: 320px; /* allow responsiveness while keeping a reasonable minimum */
@@ -909,7 +909,7 @@ input:checked + .toggle-label:before {
 }
 
 .fantastical .dot-4 {
-  background-color: var(--white);
+  background-color: #2a2a2a;
   position: relative;
   width: 4px;
   height: 4px;
@@ -1662,7 +1662,7 @@ input:checked + .toggle-label:before {
   padding: 4px 8px 16px;
   position: relative;
   background-color: var(--gray-50);
-  box-shadow: inset -1px -1px 0px #e0e0e0;
+  box-shadow: inset -1px -1px 0px #3a3a3a;
 }
 
 .fantastical .text-wrapper-11 {
@@ -1699,8 +1699,8 @@ input:checked + .toggle-label:before {
   flex-direction: column;
   width: 144.57px;
   padding: 4px 8px 16px;
-  background-color: var(--white);
-  box-shadow: inset -1px -1px 0px #e0e0e0;
+  background-color: #2a2a2a;
+  box-shadow: inset -1px -1px 0px #3a3a3a;
   align-items: flex-start;
   position: relative;
 }
@@ -1713,7 +1713,7 @@ input:checked + .toggle-label:before {
   padding: 4px 8px 16px;
   position: relative;
   background-color: var(--blue-50);
-  box-shadow: inset -1px -1px 0px #e0e0e0;
+  box-shadow: inset -1px -1px 0px #3a3a3a;
 }
 
 .fantastical .day-9 {
@@ -2653,7 +2653,7 @@ input:checked + .toggle-label:before {
 }
 
 .fantastical {
-  background-color: #ffffff;
+  background-color: #1a1a1a;
   overflow: hidden;
   width: 100%;
   min-width: 320px;
@@ -2975,7 +2975,7 @@ input:checked + .toggle-label:before {
 }
 
 .fantastical .dot-4 {
-  background-color: var(--white);
+  background-color: #2a2a2a;
   position: relative;
   width: 4px;
   height: 4px;
@@ -3451,7 +3451,7 @@ input:checked + .toggle-label:before {
   padding: 4px 8px 16px;
   position: relative;
   background-color: var(--gray-50);
-  box-shadow: inset -1px -1px 0px #e0e0e0;
+  box-shadow: inset -1px -1px 0px #3a3a3a;
 }
 
 .fantastical .text-wrapper-11 {
@@ -3488,8 +3488,8 @@ input:checked + .toggle-label:before {
   flex-direction: column;
   width: 144.57px;
   padding: 4px 8px 16px;
-  background-color: var(--white);
-  box-shadow: inset -1px -1px 0px #e0e0e0;
+  background-color: #2a2a2a;
+  box-shadow: inset -1px -1px 0px #3a3a3a;
   align-items: flex-start;
   position: relative;
 }
@@ -3502,7 +3502,7 @@ input:checked + .toggle-label:before {
   padding: 4px 8px 16px;
   position: relative;
   background-color: var(--blue-50);
-  box-shadow: inset -1px -1px 0px #e0e0e0;
+  box-shadow: inset -1px -1px 0px #3a3a3a;
 }
 
 .fantastical .day-9 {
