@@ -254,7 +254,7 @@
                 
                 if (result.success) {
                     // Redirect to main calendar
-                    window.location.href = 'index.html';
+                    window.location.href = 'app.html';
                 } else {
                     showError(result.error || 'Invalid email or password');
                     setLoading(false);
@@ -291,7 +291,7 @@
         window.addEventListener('DOMContentLoaded', async () => {
             const session = await window.getSession();
             if (session) {
-                window.location.href = 'index.html';
+                window.location.href = 'app.html';
             }
         });
     </script>
