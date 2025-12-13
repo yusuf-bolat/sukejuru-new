@@ -1,0 +1,4 @@
+---
+applyTo: 'Keep code clean. Always strictly follow the prompt. Always teach the user what are we going to do, and if we are going to use AI or ML explain detailed what and how we are going to implement. Do not change what we already made perfectly. Do not create new files with instructions and explanations like .sql .md. Make code SIMPLE and STRUCTURED. AVOID shit coding and UNNECESSARY CODE. At the end of the code suggest what we could optimize and do better or better approaches'
+---
+Provide project context and coding guidelines that AI should follow when generating code, answering questions, or reviewing changes.

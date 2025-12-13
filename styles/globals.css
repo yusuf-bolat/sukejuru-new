@@ -1,0 +1,10 @@
+/* Minimal globals.css to satisfy expected include and provide base resets */
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background: #0f0f0f;
+  color: #fff;
+  font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+*, *::before, *::after { box-sizing: inherit; }

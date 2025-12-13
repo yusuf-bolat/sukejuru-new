@@ -1,0 +1,4138 @@
+.html-body-lock,
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* prevent page-level scrolling */
+}
+
+/* Base font: Roboto */
+body, .fantastical, .fantastical * {
+  font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.fantastical {
+  background-color: #ffffff;
+  overflow: hidden; /* container doesn't scroll */
+  width: 100%;
+  min-width: 320px; /* allow responsiveness while keeping a reasonable minimum */
+  min-height: 0;
+  height: 100vh; /* occupy full viewport so sidebar/calendar can scroll internally */
+  position: relative;
+}
+
+/* Layout variables: sidebar takes 300px, right menu takes 300px, calendar gets the rest */
+:root {
+  --sidebar-width: 300px; /* fixed 300px sidebar */
+  --right-menu-width: 300px; /* fixed 300px right menu */
+  --calendar-left: var(--sidebar-width);
+  --calendar-width: calc(100vw - 300px - 300px); /* explicit values for calc */
+}
+
+/* When sidebar is hidden, adjust calendar positioning */
+.fantastical.sidebar-hidden {
+  --calendar-left: 0px;
+  --calendar-width: calc(100vw - 300px); /* only subtract right menu when sidebar hidden */
+}
+
+/* When right menu is hidden, adjust calendar width */
+.fantastical.right-menu-hidden {
+  --calendar-width: calc(100vw - 300px - 16px); /* subtract left sidebar and space for right toggle button */
+}
+
+/* When both sidebar and right menu are hidden */
+.fantastical.sidebar-hidden.right-menu-hidden {
+  --calendar-left: 0px;
+  --calendar-width: calc(100vw - 16px); /* full width minus space for right toggle button */
+}
+
+/*when right menu is hidden field-master*/
+.fantastical.right-menu-hidden .field-master {
+  margin-right: 128px; /* reduce right margin when menu is hidden */
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle {
+  position: fixed;
+  top: 16px;
+  left: calc(var(--sidebar-width) + 16px);
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  padding: 8px 12px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  width: 40px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.sidebar-toggle-icon {
+  transition: transform 0.2s ease;
+}
+
+.fantastical.sidebar-hidden .sidebar-toggle-icon {
+  transform: rotate(0deg);
+}
+
+.sidebar-toggle:hover {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-toggle:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* When sidebar is visible, button is outside the sidebar */
+.fantastical:not(.sidebar-hidden) .sidebar-toggle {
+  left: calc(var(--sidebar-width) + 16px);
+  top: 16px;
+  position: fixed;
+}
+
+/* When sidebar is hidden, button moves to the left edge */
+.fantastical.sidebar-hidden .sidebar-toggle {
+  left: 16px;
+  top: 16px;
+  position: fixed;
+}
+
+/* Right Menu Toggle Button */
+.right-menu-toggle {
+  position: fixed;
+  top: 11px;
+  z-index: 1001;
+  background: rgba(31, 31, 31, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-right: 16px;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+}
+
+.right-menu-toggle-icon {
+  font-size: 16px;
+}
+
+.right-menu-toggle:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.right-menu-toggle:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Position right menu toggle at the right edge of the header area */
+.fantastical:not(.right-menu-hidden) .right-menu-toggle {
+  right: calc(var(--right-menu-width));
+}
+
+/* When right menu is hidden, button moves to the right edge of calendar area */
+.fantastical.right-menu-hidden .right-menu-toggle {
+  right: 16px;
+}
+
+/* Hide legacy static calendar markup; FullCalendar will mount in #calendar */
+.fantastical .inner-stack,
+.fantastical .hour-row,
+.fantastical .hour-row-2,
+.fantastical article[class^="event-"] {
+  display: none !important;
+}
+
+#calendar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--calendar-width);
+  height: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+/* FullCalendar alignment & taller rows (5x) */
+/* Adjustable slot height: set per 30-min slot using the exact construction */
+#calendar { --fc-slot-height: 34px; } /* 34px => 1 hour = 68px; set to 40px => 1 hour = 80px */
+
+/* Change hour cell height via slots (construction requested) */
+.fc .fc-timegrid-slot {
+  height: var(--fc-slot-height) !important;
+  min-height: var(--fc-slot-height) !important;
+}
+
+/* Keep lanes in sync just in case */
+.fc .fc-timegrid-slot-lane {
+  height: var(--fc-slot-height) !important;
+  min-height: var(--fc-slot-height) !important;
+}
+
+#calendar .fc .fc-timegrid-axis-cushion {
+  line-height: calc(var(--fc-slot-height) * 2) !important; /* center hour labels across two slots */
+}
+#calendar .fc .fc-scrollgrid-sync-inner {
+  padding: 0 !important;
+}
+
+/* Right-side mirrored hour axis */
+.my-right-axis {
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 0; /* flush to the right edge */
+  width: 40px;
+  height: 100%;
+  overflow: hidden;
+  color: var(--gray-500);
+  font-family: "Inter", Helvetica;
+  font-size: 12px;
+  line-height: 1;
+  pointer-events: none;
+}
+.my-right-axis .fc-timegrid-axis-cushion {
+  display: block;
+  padding: 8px 0;
+}
+
+/* Mini month calendar in left menu */
+section.mini-calendar #mini-calendar {
+  width: 268px;
+}
+section.mini-calendar #mini-calendar .fc {
+  font-size: 12px;
+}
+section.mini-calendar #mini-calendar .fc .fc-toolbar-title {
+  font-size: 14px;
+}
+section.mini-calendar #mini-calendar .fc .fc-daygrid-day-number {
+  color: #fff;
+}
+section.mini-calendar #mini-calendar .fc .fc-col-header,
+section.mini-calendar #mini-calendar .fc .fc-col-header-cell {
+  background: #121212;
+}
+section.mini-calendar #mini-calendar .fc .fc-scrollgrid,
+section.mini-calendar #mini-calendar .fc .fc-daygrid-day-frame,
+section.mini-calendar #mini-calendar .fc .fc-daygrid-day,
+section.mini-calendar #mini-calendar .fc .fc-daygrid-day-top {
+  border-color: rgba(255,255,255,0.12) !important;
+}
+section.mini-calendar #mini-calendar .fc .fc-button-primary {
+  background: #2b2b2b;
+  border: none;
+}
+
+/* Remove focus outlines from all buttons */
+.fc-button:focus,
+.fc-button-primary:focus,
+button:focus,
+.fantastical button:focus,
+.fantastical .img-2:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* FullCalendar view switching buttons styling */
+.fc .fc-button-group .fc-button {
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  padding: 6px 12px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.fc .fc-button-group .fc-button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.fc .fc-button-group .fc-button.fc-button-active {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+.fc .fc-button-group .fc-button.fc-button-active:hover {
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+/* Fix button height alignment in date navigation */
+.fantastical .date .text-wrapper,
+.fantastical .date .img-2 {
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Fix toggle button heights */
+.fantastical .button-master,
+.fantastical .img-wrapper {
+  height: 32px !important;
+  box-sizing: border-box !important;
+}
+
+/* Make sure the calendar content doesn't leave an accidental gap on the right */
+.fc-timegrid-col-events {
+  padding-right: 0 !important;
+}
+
+.fantastical .left-menu {
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-width);
+  min-width: 220px; /* ensure it's not too narrow on small screens */
+  height: 100vh;
+  max-height: 100vh;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+  background-color: var(--gray-900);
+  z-index: 30;
+  transition: transform 0.3s ease;
+}
+
+.fantastical.sidebar-hidden .left-menu {
+  transform: translateX(-100%);
+}
+
+/* Right Menu Styles - Sliding functionality */
+.fantastical .right-menu {
+  display: flex;
+  flex-direction: column;
+  width: var(--right-menu-width);
+  min-width: 220px; /* ensure it's not too narrow on small screens */
+  height: 100vh;
+  max-height: 100vh;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  right: 0;
+  overflow-y: auto;
+  background-color: var(--gray-900);
+  z-index: 30;
+  transition: transform 0.3s ease;
+}
+
+.fantastical.right-menu-hidden .right-menu {
+  transform: translateX(100%);
+}
+
+/* Settings Content Styles */
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.setting-item.setting-toggle {
+  justify-content: space-between;
+}
+
+.setting-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  flex: 1;
+}
+
+.setting-control {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  min-width: 120px;
+  cursor: pointer;
+}
+
+.setting-control:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-color: #3b82f6;
+}
+
+.setting-control option {
+  background: #1f1f1f;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Toggle Switch Styles */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input[type="checkbox"] {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-label {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.toggle-label:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-label {
+  background-color: #3b82f6;
+}
+
+input:checked + .toggle-label:before {
+  transform: translateX(20px);
+}
+
+.toggle-label:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+input:checked + .toggle-label:hover {
+  background-color: #2563eb;
+}
+
+/* Settings Content Styles */
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  padding: 8px 0;
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.setting-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.setting-item.setting-toggle {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.setting-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+.setting-control {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.setting-control:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.setting-control:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Toggle Switch Styles */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-label {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.toggle-label:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-label {
+  background-color: #3b82f6;
+}
+
+input:checked + .toggle-label:before {
+  transform: translateX(20px);
+}
+
+/* Add overlay for mobile/smaller screens when sidebar is visible */
+@media (max-width: 1024px) {
+  .fantastical:not(.sidebar-hidden)::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 25;
+    backdrop-filter: blur(2px);
+  }
+  
+  .fantastical:not(.sidebar-hidden) .left-menu {
+    z-index: 35;
+  }
+
+  /* Right menu mobile overlay */
+  .fantastical:not(.right-menu-hidden)::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 25;
+    backdrop-filter: blur(2px);
+  }
+  
+  .fantastical:not(.right-menu-hidden) .right-menu {
+    z-index: 35;
+  }
+}
+
+.fantastical .top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.fantastical .dots {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  position: relative;
+  flex: 1;
+  flex-grow: 1;
+}
+
+.fantastical .ellipse {
+  background-color: #ed6b60;
+  border: 1px solid;
+  border-color: #d05147;
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.fantastical .div {
+  background-color: #f5c250;
+  border: 1px solid;
+  border-color: #d6a343;
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.fantastical .ellipse-2 {
+  background-color: #62c656;
+  border: 1px solid;
+  border-color: #52a842;
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.fantastical .div-2 {
+  display: inline-flex;
+  align-items: flex-start;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .icon-button-master {
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 6px;
+  background-color: #ffffff1a;
+  border-radius: 8px;
+  box-shadow: var(--shadow-base);
+  display: inline-flex;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .img {
+  position: relative;
+  width: 20px;
+  height: 20px;
+}
+
+.fantastical .date {
+  justify-content: space-between;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.fantastical .div-3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .text-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: var(--text-3xl-medium-font-family);
+  font-weight: var(--text-3xl-medium-font-weight);
+  color: var(--white);
+  font-size: var(--text-3xl-medium-font-size);
+  letter-spacing: var(--text-3xl-medium-letter-spacing);
+  line-height: var(--text-3xl-medium-line-height);
+  white-space: nowrap;
+  font-style: var(--text-3xl-medium-font-style);
+}
+
+.fantastical .text-wrapper-2 {
+  width: fit-content;
+  margin-top: -1px;
+  font-weight: var(--text-3xl-regular-font-weight);
+  color: var(--red-500);
+  font-size: var(--text-3xl-regular-font-size);
+  line-height: var(--text-3xl-regular-line-height);
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--text-3xl-regular-font-family);
+  letter-spacing: var(--text-3xl-regular-letter-spacing);
+  font-style: var(--text-3xl-regular-font-style);
+}
+
+.fantastical .img-2 {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.fantastical .mini-calendar {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .div-4 {
+  display: flex;
+  width: 268px;
+  align-items: flex-start;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .day-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 4px;
+  position: relative;
+  flex: 1;
+  flex-grow: 1;
+}
+
+.fantastical .day {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 600;
+  color: var(--gray-500);
+  font-size: 10px;
+  text-align: center;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .day-2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px;
+  position: relative;
+  flex: 1;
+  flex-grow: 1;
+}
+
+.fantastical .day-3 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 600;
+  color: var(--gray-500);
+  font-size: 11px;
+  text-align: center;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-dots {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 2px;
+  position: relative;
+  flex: 0 0 auto;
+  opacity: 0;
+}
+
+.fantastical .dot {
+  background-color: var(--blue-500);
+  position: relative;
+  width: 4px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.fantastical .day-4 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 600;
+  color: var(--white);
+  font-size: 11px;
+  text-align: center;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-dots-2 {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 2px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .dot-2 {
+  background-color: var(--purple-500);
+  position: relative;
+  width: 4px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.fantastical .dot-3 {
+  background-color: var(--teal-400);
+  position: relative;
+  width: 4px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.fantastical .frame-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  flex-grow: 1;
+}
+
+.fantastical .frame {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px;
+  position: relative;
+  flex: 0 0 auto;
+  background-color: var(--blue-500);
+  border-radius: 100px;
+}
+
+.fantastical .day-5 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 600;
+  color: var(--white);
+  font-size: 11px;
+  text-align: center;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .dot-4 {
+  background-color: var(--white);
+  position: relative;
+  width: 4px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.fantastical .days-wrapper {
+  position: relative;
+  width: 268px;
+  height: 552px;
+  overflow: hidden;
+  overflow-y: scroll;
+}
+
+.fantastical .days-wrapper::-webkit-scrollbar {
+  width: 0;
+  display: none;
+}
+
+.fantastical .days {
+  display: flex;
+  flex-direction: column;
+  width: 268px;
+  gap: 8px;
+  align-items: flex-start;
+  position: relative;
+}
+
+.fantastical .div-5 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+  padding: 15px;
+  background-color: #121212; /* match screenshot header background */
+}
+
+/* When sidebar is hidden, add left margin to make room for toggle button */
+.fantastical.sidebar-hidden .div-5 {
+  padding-left: 50px; /* Make room for toggle button */
+}
+
+/* Make sure the main header inside the calendar-base fills that area exactly */
+.fantastical .calendar-base > header.div-5 {
+  width: var(--calendar-width);
+  box-sizing: border-box;
+  margin: 0;
+  padding: 15px;
+  padding-right: 128px;
+  transition: width 0.3s ease;
+}
+
+/* When right menu is visible, add padding for the toggle button */
+.fantastical:not(.right-menu-hidden) .calendar-base > header.div-5 {
+  padding-right: 80px; /* make room for right-side toggle button */
+}
+
+/* When right menu is hidden, add more padding since button is closer */
+.fantastical.right-menu-hidden .calendar-base > header.div-5 {
+  padding-right: 80px; /* make room for right-side toggle button when menu is hidden */
+}
+
+/* keep the calendar header visible when scrolling the calendar area */
+.fantastical .calendar-base > header.div-5 {
+  position: sticky;
+  top: 0;
+  z-index: 60; /* above calendar contents but below sidebar */
+  background: #121212; /* ensure header uses exact color */
+}
+
+/* FullCalendar: ensure the column/day header rows stick beneath our header
+   Use the --header-height variable set by JS to offset them correctly. */
+#calendar {
+  --header-height: 0px;
+}
+
+#calendar .fc-col-header,
+#calendar .fc-col-header-cell,
+#calendar .fc-col-header-row,
+#calendar .fc-daygrid-head,
+#calendar .fc-scrollgrid-section-header {
+  position: sticky !important;
+  top: var(--header-height) !important;
+  z-index: 55 !important;
+  background: #121212 !important; /* match page header */
+}
+
+/* Eliminate any top border/margin that could show a strip between headers */
+#calendar .fc .fc-scrollgrid {
+  border-top: none !important;
+  margin-top: 0 !important;
+  background: #121212 !important;
+}
+#calendar .fc .fc-scrollgrid-section-header th,
+#calendar .fc .fc-col-header-cell {
+  border-top: none !important;
+}
+
+/* Custom formatting for the day header cells */
+.fc-custom-day-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gray-500);
+  text-align: left;
+}
+.fc-custom-day-num {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--black, #000);
+  text-align: left;
+  line-height: 1;
+}
+
+/* Hide original FullCalendar header content to prevent duplication in both states */
+#calendar .fc-col-header-cell .fc-col-header-cell-cushion {
+  display: none !important;
+}
+
+/* Ensure custom formatting is always visible in both states */
+#calendar .fc-custom-day-name,
+#calendar .fc-custom-day-num {
+  display: block !important;
+}
+
+/* Calendar grid line color: subtle white on dark background */
+#calendar .fc .fc-scrollgrid th,
+#calendar .fc .fc-scrollgrid td,
+#calendar .fc .fc-scrollgrid-section-header,
+#calendar .fc .fc-col-header-cell,
+#calendar .fc .fc-daygrid-day-top,
+#calendar .fc .fc-timegrid-slot,
+#calendar .fc .fc-timegrid-slot-lane,
+#calendar .fc .fc-timegrid-axis-cushion {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: inherit;
+}
+
+/* Ensure vertical separators also use the same subtle color */
+#calendar .fc .fc-scrollgrid .fc-scrollgrid-section > div {
+  border-left-color: rgba(255, 255, 255, 0.12) !important;
+  border-right-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Ensure FullCalendar events are visible on dark backgrounds */
+#calendar .fc .fc-event,
+#calendar .fc .fc-daygrid-event,
+#calendar .fc .fc-timegrid-event,
+#calendar .fc .fc-event-main,
+#calendar .fc .fc-event-main-frame {
+  display: block !important;
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 6px !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  min-height: 20px !important;
+  overflow: visible !important;
+  z-index: 60 !important;
+}
+
+#calendar .fc .fc-event-time,
+#calendar .fc .fc-event-title {
+  color: #ffffff !important;
+}
+
+/* Gridline refinement
+   - Remove gridlines in the first column (time axis)
+   - For the rest, hide top/bottom/left lines (blend with background) and keep right separators subtle */
+#calendar .fc .fc-timegrid-axis,
+#calendar .fc .fc-timegrid-axis th,
+#calendar .fc .fc-timegrid-axis td,
+#calendar .fc .fc-timegrid-axis * {
+  border-color: #121212 !important;
+  border-right-color: #121212 !important; /* also hide the separator next to axis */
+}
+
+#calendar .fc .fc-scrollgrid th,
+#calendar .fc .fc-scrollgrid td,
+#calendar .fc .fc-timegrid-slot,
+#calendar .fc .fc-timegrid-slot-lane {
+  border-top-color: #121212 !important;
+  border-bottom-color: #121212 !important;
+  border-left-color: #121212 !important;
+  border-right-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Also clear the top border in the header's first cell (corner cell) */
+#calendar .fc .fc-scrollgrid-section-header th:first-child {
+  border-color: #121212 !important;
+  border-right-color: #121212 !important;
+}
+
+/* Force the time axis slot label cell borders (first column) to #121212 */
+#calendar .fc td.fc-timegrid-slot.fc-timegrid-slot-label {
+  border-top-color: #121212 !important;
+  border-bottom-color: #121212 !important;
+  border-left-color: #121212 !important;
+  border-right-color: #121212 !important; /* the visible separator next to axis */
+}
+
+/* Debug: outline events mounted by FullCalendar to help find them in the layout */
+#calendar .fc .fc-debug-mounted {
+  outline: 2px dashed rgba(255,255,255,0.18) !important;
+}
+
+/* === Final overrides: enforce first-column (time axis) separator color === */
+#calendar .fc tr > td.fc-timegrid-slot.fc-timegrid-slot-label,
+#calendar .fc td.fc-timegrid-slot.fc-timegrid-slot-label.fc-scrollgrid-shrink {
+  border-top: 1px solid #121212 !important;
+  border-bottom: 1px solid #121212 !important;
+  border-left: 1px solid #121212 !important;
+  border-right: 1px solid #121212 !important; /* separator next to axis */
+}
+
+/* Also make the adjacent first lane cell's left border match #121212 */
+#calendar .fc td.fc-timegrid-slot.fc-timegrid-slot-label + td.fc-timegrid-slot.fc-timegrid-slot-lane {
+  border-left: 1px solid #121212 !important;
+}
+
+/* Header corner and adjacent cell consistency */
+#calendar .fc .fc-scrollgrid-section-header tr > th:first-child,
+#calendar .fc .fc-scrollgrid-section-header tr > th:first-child + th {
+  border-left: 1px solid #121212 !important;
+  border-right: 1px solid #121212 !important;
+}
+
+.fantastical .div-6 {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 4px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .text-wrapper-3 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 700;
+  color: var(--blue-500);
+  font-size: 13px;
+  letter-spacing: 0;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.fantastical .element {
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 400;
+  color: var(--blue-500);
+  font-size: 13px;
+  letter-spacing: 0;
+  line-height: 20px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.fantastical .text-wrapper-4 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 700;
+  color: #ffffffb2;
+  font-size: 13px;
+  letter-spacing: 0;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.fantastical .text-wrapper-5 {
+  font-weight: 400;
+  color: #ffffffb2;
+  font-size: 13px;
+  line-height: 20px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.fantastical .all-day-event {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 0px 6px;
+  position: relative;
+  flex: 0 0 auto;
+  background-color: var(--purple-500);
+  border-radius: 6px;
+}
+
+.fantastical .text-wrapper-6 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: var(--text-sm-medium-font-family);
+  font-weight: var(--text-sm-medium-font-weight);
+  color: var(--white);
+  font-size: var(--text-sm-medium-font-size);
+  letter-spacing: var(--text-sm-medium-letter-spacing);
+  line-height: var(--text-sm-medium-line-height);
+  white-space: nowrap;
+  font-style: var(--text-sm-medium-font-style);
+}
+
+.fantastical .event {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.fantastical .meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.fantastical .ellipse-3 {
+  background-color: var(--blue-500);
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.fantastical .text-wrapper-7 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 600;
+  color: var(--gray-400);
+  font-size: 11px;
+  letter-spacing: 0;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.fantastical .text-wrapper-8 {
+  font-weight: 600;
+  color: var(--gray-400);
+  font-size: 10px;
+  line-height: 16px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.fantastical .video-camera-wrapper {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 2px;
+  position: relative;
+  flex: 0 0 auto;
+  background-color: var(--gray-400);
+  border-radius: 100px;
+}
+
+.fantastical .video-camera {
+  position: relative;
+  width: 8px;
+  height: 8px;
+}
+
+.fantastical .div-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 0px 0px 0px 20px;
+  align-self: stretch;
+  width: 100%;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .text-wrapper-9 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  margin-top: -1px;
+  font-family: var(--text-xs-medium-font-family);
+  font-weight: var(--text-xs-medium-font-weight);
+  color: var(--white);
+  font-size: var(--text-xs-medium-font-size);
+  letter-spacing: var(--text-xs-medium-letter-spacing);
+  line-height: var(--text-xs-medium-line-height);
+  font-style: var(--text-xs-medium-font-style);
+}
+
+.fantastical .text-wrapper-10 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 400;
+  color: var(--gray-400);
+  font-size: 11px;
+  letter-spacing: 0;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.fantastical .ellipse-4 {
+  background-color: var(--pink-500);
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.fantastical .ellipse-5 {
+  background-color: var(--amber-400);
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.fantastical .all-day-event-2 {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 0px 6px;
+  position: relative;
+  flex: 0 0 auto;
+  background-color: var(--green-500);
+  border-radius: 6px;
+}
+
+.fantastical .calendar-base {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: var(--calendar-left);
+  width: var(--calendar-width);
+  height: 100vh;
+  overflow: auto;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+/* Smooth transitions for FullCalendar column width changes */
+#calendar .fc-col-header-cell,
+#calendar .fc-daygrid-day,
+#calendar .fc-timegrid-col,
+#calendar .fc-timegrid-slot,
+#calendar .fc-scrollgrid-sync-table,
+#calendar .fc-scrollgrid table,
+#calendar .fc-scrollgrid td,
+#calendar .fc-scrollgrid th {
+  transition: width 0.3s ease, min-width 0.3s ease, max-width 0.3s ease !important;
+}
+
+/* Ensure calendar container transitions smoothly */
+#calendar {
+  transition: width 0.3s ease !important;
+}
+
+/* ensure the FullCalendar pane inside calendar-base fills available space */
+.fantastical .calendar-base > #calendar {
+  position: relative;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--calendar-width);
+  height: 100%;
+  margin: 0;
+  /* remove top padding so header aligns flush; keep horizontal and bottom inset */
+  padding: 0 16px 16px 16px; /* top 0, right 16px, bottom 16px, left 16px */
+}
+
+.fantastical .arrows {
+  gap: 1px;
+  display: inline-flex;
+  align-items: flex-start;
+  position: relative;
+  flex: 0 0 auto;
+  transition: margin-left 0.3s ease;
+}
+
+/* Add left margin to arrows when sidebar is hidden to make room for toggle button */
+.fantastical.sidebar-hidden .arrows {
+  margin-left: 60px;
+}
+
+/* Add left margin to arrows when sidebar is open - position 16px right of toggle button */
+.fantastical:not(.sidebar-hidden) .arrows {
+  margin-left: calc(60px + 0px); /* sidebar + 16px gap + 40px button var(--sidebar-width)*/
+}
+
+.fantastical .icon-wrapper {
+  border-radius: 6px 0px 0px 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px;
+  position: relative;
+  flex: 0 0 auto;
+  background-color: var(--gray-100);
+}
+
+.fantastical .button {
+  all: unset;
+  box-sizing: border-box;
+  align-items: flex-start;
+  display: inline-flex;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .button-master {
+  padding: 6px 16px;
+  background-color: var(--gray-100);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .text {
+  font-weight: var(--text-xs-regular-font-weight);
+  color: var(--gray-900);
+  font-size: var(--text-xs-regular-font-size);
+  line-height: var(--text-xs-regular-line-height);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: var(--text-xs-regular-font-family);
+  letter-spacing: var(--text-xs-regular-letter-spacing);
+  white-space: nowrap;
+  font-style: var(--text-xs-regular-font-style);
+}
+
+.fantastical .img-wrapper {
+  border-radius: 0px 6px 6px 0px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px;
+  position: relative;
+  flex: 0 0 auto;
+  background-color: var(--gray-100);
+}
+
+.fantastical .button-master-2 {
+  align-items: center;
+  gap: 8px;
+  padding: 4px 16px;
+  border-radius: 8px;
+  display: inline-flex;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .text-2 {
+  font-weight: var(--text-sm-medium-font-weight);
+  color: var(--gray-500);
+  font-size: var(--text-sm-medium-font-size);
+  line-height: var(--text-sm-medium-line-height);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: var(--text-sm-medium-font-family);
+  letter-spacing: var(--text-sm-medium-letter-spacing);
+  white-space: nowrap;
+  font-style: var(--text-sm-medium-font-style);
+}
+
+.fantastical .button-master-3 {
+  padding: 4px 16px;
+  background-color: var(--red-600);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .field {
+  width: 184px;
+  align-items: flex-start;
+  display: flex;
+  position: relative;
+}
+
+/* Reduce gap between view tabs and search field so search sits more to the left */
+.fantastical .div-5 nav[role="tablist"] {
+  margin-right: 12px;
+}
+.fantastical .field {
+  margin-left: 0;
+}
+
+.fantastical .field-master {
+  width: 184px;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  padding-right: 35px; /* extra space to the right as requested */
+  flex: 0 0 auto;
+  background-color: var(--gray-100);
+  border-radius: 4px;
+  display: flex;
+  position: relative;
+  margin-right: 60px;
+
+}
+
+.fantastical .search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 1;
+  font-family: var(--text-xs-regular-font-family);
+  font-weight: var(--text-xs-regular-font-weight);
+  color: var(--gray-400);
+  font-size: var(--text-xs-regular-font-size);
+  letter-spacing: var(--text-xs-regular-letter-spacing);
+  line-height: var(--text-xs-regular-line-height);
+  font-style: var(--text-xs-regular-font-style);
+  background: transparent;
+  border: none;
+  padding: 0;
+  width: 184px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+
+.fantastical .inner-stack {
+  display: inline-flex;
+  flex-direction: column;
+  height: 878px;
+  align-items: flex-start;
+  position: relative;
+  margin-bottom: -50px;
+  margin-right: -48px;
+}
+
+/* hide legacy static calendar markup — FullCalendar will render instead */
+.fantastical .inner-stack,
+.fantastical .hour-row,
+.fantastical .hour-row-2,
+.fantastical .event-2,
+.fantastical .event-3,
+.fantastical .event-4,
+.fantastical .event-5,
+.fantastical .event-6,
+.fantastical .event-7,
+.fantastical .event-8,
+.fantastical .event-9,
+.fantastical .event-10,
+.fantastical .event-11,
+.fantastical .event-12,
+.fantastical .event-13,
+.fantastical .event-14,
+.fantastical .event-15,
+.fantastical .event-16,
+.fantastical .event-17,
+.fantastical .event-18,
+.fantastical .event-19,
+.fantastical .event-20,
+.fantastical .event-21 {
+  display: none !important;
+}
+
+.fantastical .week-days {
+  display: flex;
+  width: 1108px;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 0px 0px 0px 48px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .day-6 {
+  display: flex;
+  flex-direction: column;
+  width: 144.57px;
+  align-items: flex-start;
+  padding: 4px 8px 16px;
+  position: relative;
+  background-color: var(--gray-50);
+  box-shadow: inset -1px -1px 0px #e0e0e0;
+}
+
+.fantastical .text-wrapper-11 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 700;
+  color: var(--gray-500);
+  font-size: 10px;
+  letter-spacing: 0;
+  line-height: 12px;
+}
+
+.fantastical .text-wrapper-12 {
+  align-self: stretch;
+  font-weight: 500;
+  color: #000000;
+  font-size: 22px;
+  line-height: 32px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+}
+
+.fantastical .day-7 {
+  display: flex;
+  flex-direction: column;
+  width: 144.57px;
+  padding: 4px 8px 16px;
+  background-color: var(--white);
+  box-shadow: inset -1px -1px 0px #e0e0e0;
+  align-items: flex-start;
+  position: relative;
+}
+
+.fantastical .day-8 {
+  display: flex;
+  flex-direction: column;
+  width: 144.57px;
+  align-items: flex-start;
+  padding: 4px 8px 16px;
+  position: relative;
+  background-color: var(--blue-50);
+  box-shadow: inset -1px -1px 0px #e0e0e0;
+}
+
+.fantastical .day-9 {
+  display: flex;
+  flex-direction: column;
+  width: 144.57px;
+  align-items: flex-start;
+  padding: 4px 8px 16px;
+  position: relative;
+  background-color: var(--gray-50);
+  box-shadow: inset 0px -1px 0px #e0e0e0;
+}
+
+.fantastical .EST-GMT {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  margin-top: -1px;
+  margin-right: -12px;
+  font-family: var(--text-xs-medium-font-family);
+  font-weight: var(--text-xs-medium-font-weight);
+  color: var(--gray-500);
+  font-size: var(--text-xs-medium-font-size);
+  letter-spacing: var(--text-xs-medium-letter-spacing);
+  line-height: var(--text-xs-medium-line-height);
+  font-style: var(--text-xs-medium-font-style);
+}
+
+.fantastical .hour-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.fantastical .time {
+  display: flex;
+  justify-content: center;
+  width: 36px;
+  margin-top: -1px;
+  font-family: var(--text-xs-medium-font-family);
+  font-weight: var(--text-xs-medium-font-weight);
+  color: var(--gray-500);
+  font-size: var(--text-xs-medium-font-size);
+  letter-spacing: var(--text-xs-medium-letter-spacing);
+  line-height: var(--text-xs-medium-line-height);
+  align-items: center;
+  position: relative;
+  font-style: var(--text-xs-medium-font-style);
+}
+
+.fantastical .blocks {
+  position: relative;
+  align-self: stretch;
+  flex: 0 0 auto;
+}
+
+.fantastical .hour-row-2 {
+  display: flex;
+  width: 1156px;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .event-2 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 196px;
+  left: 509px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .bar {
+  background-color: var(--lightblue-500);
+  position: relative;
+  align-self: stretch;
+  width: 3px;
+}
+
+.fantastical .body {
+  display: flex;
+  flex-direction: column;
+  height: 68px;
+  align-items: flex-start;
+  padding: 6px;
+  position: relative;
+  flex: 1;
+  flex-grow: 1;
+  border-radius: 4px;
+}
+
+.fantastical .time-2 {
+  display: flex;
+  gap: 4px;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+  align-items: center;
+  position: relative;
+}
+
+.fantastical .text-wrapper-13 {
+  width: fit-content;
+  margin-top: -1px;
+  font-weight: var(--text-xs-medium-font-weight);
+  color: var(--lightblue-700);
+  font-size: var(--text-xs-medium-font-size);
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--text-xs-medium-font-family);
+  letter-spacing: var(--text-xs-medium-letter-spacing);
+  line-height: var(--text-xs-medium-line-height);
+  font-style: var(--text-xs-medium-font-style);
+}
+
+.fantastical .frame-2 {
+  background-color: var(--lightblue-700);
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 2px;
+  position: relative;
+  flex: 0 0 auto;
+  border-radius: 100px;
+}
+
+.fantastical .end {
+  align-self: stretch;
+  font-weight: 600;
+  color: var(--lightblue-700);
+  font-size: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-3 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 266px;
+  left: 509px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-4 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 340px;
+  left: 509px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-5 {
+  display: flex;
+  width: 143px;
+  height: 140px;
+  align-items: flex-start;
+  position: absolute;
+  top: 412px;
+  left: 509px;
+  background-color: #8b5cf61a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .bar-2 {
+  background-color: var(--violet-500);
+  position: relative;
+  align-self: stretch;
+  width: 3px;
+}
+
+.fantastical .text-wrapper-14 {
+  width: fit-content;
+  margin-top: -1px;
+  font-weight: var(--text-xs-medium-font-weight);
+  color: var(--violet-700);
+  font-size: var(--text-xs-medium-font-size);
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--text-xs-medium-font-family);
+  letter-spacing: var(--text-xs-medium-letter-spacing);
+  line-height: var(--text-xs-medium-line-height);
+  font-style: var(--text-xs-medium-font-style);
+}
+
+.fantastical .end-2 {
+  align-self: stretch;
+  font-weight: 600;
+  color: var(--violet-700);
+  font-size: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-6 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 556px;
+  left: 509px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-7 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 556px;
+  left: 943px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .text-wrapper-15 {
+  width: fit-content;
+  margin-top: -1px;
+  font-weight: 500;
+  color: var(--lightblue-700);
+  font-size: 12px;
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-8 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 628px;
+  left: 509px;
+  background-color: #f59e0b1a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .bar-3 {
+  background-color: var(--amber-500);
+  position: relative;
+  align-self: stretch;
+  width: 3px;
+}
+
+.fantastical .text-wrapper-16 {
+  width: fit-content;
+  margin-top: -1px;
+  font-weight: var(--text-xs-medium-font-weight);
+  color: var(--amber-700);
+  font-size: var(--text-xs-medium-font-size);
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--text-xs-medium-font-family);
+  letter-spacing: var(--text-xs-medium-letter-spacing);
+  line-height: var(--text-xs-medium-line-height);
+  font-style: var(--text-xs-medium-font-style);
+}
+
+.fantastical .frame-3 {
+  background-color: var(--amber-700);
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 2px;
+  position: relative;
+  flex: 0 0 auto;
+  border-radius: 100px;
+}
+
+.fantastical .end-3 {
+  align-self: stretch;
+  font-weight: 600;
+  color: var(--amber-700);
+  font-size: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-9 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 628px;
+  left: 1087px;
+  background-color: #f59e0b1a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-10 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 772px;
+  left: 653px;
+  background-color: var(--rose-100);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .bar-4 {
+  background-color: var(--rose-500);
+  position: relative;
+  align-self: stretch;
+  width: 3px;
+}
+
+.fantastical .text-wrapper-17 {
+  width: fit-content;
+  margin-top: -1px;
+  font-weight: var(--text-xs-medium-font-weight);
+  color: var(--rose-700);
+  font-size: var(--text-xs-medium-font-size);
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--text-xs-medium-font-family);
+  letter-spacing: var(--text-xs-medium-letter-spacing);
+  line-height: var(--text-xs-medium-line-height);
+  font-style: var(--text-xs-medium-font-style);
+}
+
+.fantastical .frame-4 {
+  background-color: var(--rose-700);
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 2px;
+  position: relative;
+  flex: 0 0 auto;
+  border-radius: 100px;
+}
+
+.fantastical .end-4 {
+  align-self: stretch;
+  font-weight: 600;
+  color: var(--rose-700);
+  font-size: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-11 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 772px;
+  left: 1087px;
+  background-color: var(--rose-100);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-12 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 484px;
+  left: 653px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-13 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 484px;
+  left: 1087px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-14 {
+  display: flex;
+  width: 71px;
+  height: 142px;
+  align-items: flex-start;
+  position: absolute;
+  top: 268px;
+  left: 653px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .end-5 {
+  align-self: stretch;
+  margin-bottom: -23px;
+  font-weight: 600;
+  color: var(--lightblue-700);
+  font-size: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-15 {
+  display: flex;
+  width: 71px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 268px;
+  left: 725px;
+  background-color: #10b9811a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .bar-5 {
+  background-color: var(--emerald-500);
+  position: relative;
+  align-self: stretch;
+  width: 3px;
+}
+
+.fantastical .text-wrapper-18 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: var(--text-xs-medium-font-family);
+  font-weight: var(--text-xs-medium-font-weight);
+  color: var(--emerald-700);
+  font-size: var(--text-xs-medium-font-size);
+  letter-spacing: var(--text-xs-medium-letter-spacing);
+  line-height: var(--text-xs-medium-line-height);
+  white-space: nowrap;
+  font-style: var(--text-xs-medium-font-style);
+}
+
+.fantastical .end-6 {
+  align-self: stretch;
+  font-weight: 600;
+  color: var(--emerald-700);
+  font-size: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-16 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 268px;
+  left: 798px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-17 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 268px;
+  left: 1087px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-18 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 412px;
+  left: 798px;
+  background-color: #8b5cf61a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .text-wrapper-19 {
+  width: fit-content;
+  margin-top: -1px;
+  font-weight: 500;
+  color: var(--violet-700);
+  font-size: 12px;
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .frame-5 {
+  background-color: var(--violet-700);
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 2px;
+  position: relative;
+  flex: 0 0 auto;
+  border-radius: 100px;
+}
+
+.fantastical .event-19 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 340px;
+  left: 943px;
+  background-color: #8b5cf61a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-20 {
+  display: flex;
+  width: 143px;
+  height: 142px;
+  align-items: flex-start;
+  position: absolute;
+  top: 628px;
+  left: 653px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-21 {
+  display: flex;
+  width: 143px;
+  height: 142px;
+  align-items: flex-start;
+  position: absolute;
+  top: 556px;
+  left: 798px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* ===== FINAL OVERRIDES (EOF) =====
+   Force first column (time label) grid borders to #121212 and align the adjacent lane. */
+#calendar .fc .fc-timegrid-body table tbody tr > td.fc-timegrid-slot.fc-timegrid-slot-label,
+#calendar .fc td.fc-timegrid-slot.fc-timegrid-slot-label,
+#calendar .fc td.fc-timegrid-slot.fc-timegrid-slot-label.fc-scrollgrid-shrink {
+  border-top: 1px solid #121212 !important;
+  border-bottom: 1px solid #121212 !important;
+  border-left: 1px solid #121212 !important;
+  border-right: 1px solid #121212 !important;
+}
+
+#calendar .fc .fc-timegrid-body table tbody tr > td.fc-timegrid-slot.fc-timegrid-slot-label + td.fc-timegrid-slot.fc-timegrid-slot-lane,
+#calendar .fc td.fc-timegrid-slot.fc-timegrid-slot-label + td.fc-timegrid-slot.fc-timegrid-slot-lane {
+  border-left: 1px solid #121212 !important;
+}
+
+/* Corner header and first header cell consistency */
+#calendar .fc .fc-scrollgrid-section-header table thead tr > th:first-child,
+#calendar .fc .fc-scrollgrid-section-header table thead tr > th:first-child + th {
+  border-left: 1px solid #121212 !important;
+  border-right: 1px solid #121212 !important;
+}
+
+/* ===== Requested FullCalendar event box styles ===== */
+/* Event container */
+#calendar .fc .fc-event {
+  background-color: #e6f4fa !important;   /* light body color */
+  border: none !important;                /* remove default border */
+  border-radius: 4px !important;          /* soft corners */
+  padding: 6px 8px !important;            /* spacing inside box */
+  color: #1268a0 !important;              /* text color */
+  font-size: 14px !important;
+  position: relative !important;          /* allow ::before strip positioning */
+  box-shadow: none !important;            /* remove shadow */
+}
+
+/* Bold left strip */
+#calendar .fc .fc-event::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 6px;                             /* thickness of strip */
+  background-color: #1a73e8;              /* main event color (Google blue) */
+  border-radius: 4px 0 0 4px;             /* rounded left edge */
+}
+
+/* Push text away from the strip */
+#calendar .fc .fc-event-main {
+  margin-left: 10px;
+}
+
+/* Time (top line) */
+#calendar .fc .fc-event-time {
+  display: block;
+  font-weight: normal; /* lighter */
+}
+
+/* Title (second line) */
+#calendar .fc .fc-event-title {
+  display: block;
+  font-weight: bold;  /* make it pop */
+}
+
+/* ==== Left menu header (Month Year + chevrons) alignment ==== */
+.fantastical .left-menu .date {
+  height: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+.fantastical .left-menu .date .div-3 {
+  display: flex;
+  align-items: center; /* vertically center month/year */
+  justify-content: flex-start; /* keep text to the left */
+  text-align: left;
+  gap: 6px;
+  flex: 1; /* occupy left side so chevrons stay on the right */
+  height: 40px; /* match parent height */
+}
+.fantastical .left-menu .date .text-wrapper { /* Month */
+  font-size: 22px;
+  line-height: 40px; /* center within 40px header */
+  margin: 0 !important; /* kill default h1 margins */
+  display: inline-flex;
+  align-items: center;
+}
+.fantastical .left-menu .date .text-wrapper-2 { /* Year */
+  font-size: 22px;
+  line-height: 40px; /* center within 40px header */
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+}
+.fantastical .left-menu .date .div-2 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.fantastical .left-menu .date .img-2 { /* chevron buttons */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 6px;
+}
+.fantastical .left-menu .date .img-2 img { width: 18px; height: 18px; }
+/* Remove blue focus ring on the mini calendar chevrons only */
+.fantastical .left-menu .date .img-2:focus,
+.fantastical .left-menu .date .img-2:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+/* Original CSS code should be injected here */
+
+/* Additional semantic and accessibility improvements */
+.fantastical .day-3,
+.fantastical .day-4,
+.fantastical .day-5 {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  text-align: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+}
+
+.fantastical .day-3:hover,
+.fantastical .day-4:hover,
+.fantastical .day-5:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.fantastical .day-3:focus,
+.fantastical .day-4:focus,
+.fantastical .day-5:focus {
+  outline: 2px solid var(--blue-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.fantastical .img-2 {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fantastical .img-2:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.fantastical .img-2:focus {
+  outline: none !important;
+}
+
+.fantastical .icon-wrapper,
+.fantastical .img-wrapper {
+  cursor: pointer;
+}
+
+.fantastical .icon-wrapper:hover,
+.fantastical .img-wrapper:hover {
+  background-color: var(--gray-200);
+}
+
+.fantastical .icon-wrapper:focus,
+.fantastical .img-wrapper:focus {
+  outline: 2px solid var(--blue-500);
+  outline-offset: 2px;
+}
+
+.fantastical .search:focus {
+  outline: none;
+}
+
+.fantastical .event-2,
+.fantastical .event-3,
+.fantastical .event-4,
+.fantastical .event-5,
+.fantastical .event-6,
+.fantastical .event-7,
+.fantastical .event-8,
+.fantastical .event-9,
+.fantastical .event-10,
+.fantastical .event-11,
+.fantastical .event-12,
+.fantastical .event-13,
+.fantastical .event-14,
+.fantastical .event-15,
+.fantastical .event-16,
+.fantastical .event-17,
+.fantastical .event-18,
+.fantastical .event-19,
+.fantastical .event-20,
+.fantastical .event-21 {
+  cursor: pointer;
+}
+
+.fantastical .event-2:hover,
+.fantastical .event-3:hover,
+.fantastical .event-4:hover,
+.fantastical .event-5:hover,
+.fantastical .event-6:hover,
+.fantastical .event-7:hover,
+.fantastical .event-8:hover,
+.fantastical .event-9:hover,
+.fantastical .event-10:hover,
+.fantastical .event-11:hover,
+.fantastical .event-12:hover,
+.fantastical .event-13:hover,
+.fantastical .event-14:hover,
+.fantastical .event-15:hover,
+.fantastical .event-16:hover,
+.fantastical .event-17:hover,
+.fantastical .event-18:hover,
+.fantastical .event-19:hover,
+.fantastical .event-20:hover,
+.fantastical .event-21:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fantastical .event-2:focus,
+.fantastical .event-3:focus,
+.fantastical .event-4:focus,
+.fantastical .event-5:focus,
+.fantastical .event-6:focus,
+.fantastical .event-7:focus,
+.fantastical .event-8:focus,
+.fantastical .event-9:focus,
+.fantastical .event-10:focus,
+.fantastical .event-11:focus,
+.fantastical .event-12:focus,
+.fantastical .event-13:focus,
+.fantastical .event-14:focus,
+.fantastical .event-15:focus,
+.fantastical .event-16:focus,
+.fantastical .event-17:focus,
+.fantastical .event-18:focus,
+.fantastical .event-19:focus,
+.fantastical .event-20:focus,
+.fantastical .event-21:focus {
+  outline: 2px solid var(--blue-500);
+  outline-offset: 2px;
+}
+
+.fantastical .text-wrapper-10 {
+  color: var(--blue-500);
+  text-decoration: underline;
+}
+
+.fantastical .text-wrapper-10:hover {
+  color: var(--blue-600);
+}
+
+.fantastical .text-wrapper-10:focus {
+  outline: 2px solid var(--blue-500);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Responsive improvements */
+@media (max-width: 1440px) {
+  .fantastical {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .fantastical .calendar-base {
+  width: calc(100% - var(--sidebar-width));
+  }
+}
+
+@media (max-width: 768px) {
+  .fantastical .left-menu {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+
+  .fantastical .calendar-base {
+    width: 100%;
+    left: 0;
+    top: auto;
+    position: relative;
+  }
+}
+
+.fantastical {
+  background-color: #ffffff;
+  overflow: hidden;
+  width: 100%;
+  min-width: 320px;
+  height: 100vh;
+  position: relative;
+}
+
+.fantastical .left-menu {
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-width);
+  min-width: 220px;
+  height: 100vh;
+  max-height: 100vh;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+  background-color: var(--gray-900);
+  z-index: 30;
+}
+
+.fantastical .top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.fantastical .dots {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  position: relative;
+  flex: 1;
+  flex-grow: 1;
+}
+
+.fantastical .ellipse {
+  background-color: #ed6b60;
+  border: 1px solid;
+  border-color: #d05147;
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.fantastical .div {
+  background-color: #f5c250;
+  border: 1px solid;
+  border-color: #d6a343;
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.fantastical .ellipse-2 {
+  background-color: #62c656;
+  border: 1px solid;
+  border-color: #52a842;
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.fantastical .div-2 {
+  display: inline-flex;
+  align-items: flex-start;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .icon-button-master {
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 6px;
+  background-color: #ffffff1a;
+  border-radius: 8px;
+  box-shadow: var(--shadow-base);
+  display: inline-flex;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .img {
+  position: relative;
+  width: 20px;
+  height: 20px;
+}
+
+.fantastical .date {
+  justify-content: space-between;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.fantastical .div-3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .text-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: var(--text-3xl-medium-font-family);
+  font-weight: var(--text-3xl-medium-font-weight);
+  color: var(--white);
+  font-size: var(--text-3xl-medium-font-size);
+  letter-spacing: var(--text-3xl-medium-letter-spacing);
+  line-height: var(--text-3xl-medium-line-height);
+  white-space: nowrap;
+  font-style: var(--text-3xl-medium-font-style);
+}
+
+.fantastical .text-wrapper-2 {
+  width: fit-content;
+  margin-top: -1px;
+  font-weight: var(--text-3xl-regular-font-weight);
+  color: var(--red-500);
+  font-size: var(--text-3xl-regular-font-size);
+  line-height: var(--text-3xl-regular-line-height);
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--text-3xl-regular-font-family);
+  letter-spacing: var(--text-3xl-regular-letter-spacing);
+  font-style: var(--text-3xl-regular-font-style);
+}
+
+.fantastical .img-2 {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.fantastical .mini-calendar {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .div-4 {
+  display: flex;
+  width: 268px;
+  align-items: flex-start;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .day-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 4px;
+  position: relative;
+  flex: 1;
+  flex-grow: 1;
+}
+
+.fantastical .day {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 600;
+  color: var(--gray-500);
+  font-size: 10px;
+  text-align: center;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .day-2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px;
+  position: relative;
+  flex: 1;
+  flex-grow: 1;
+}
+
+.fantastical .day-3 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 600;
+  color: var(--gray-500);
+  font-size: 11px;
+  text-align: center;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-dots {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 2px;
+  position: relative;
+  flex: 0 0 auto;
+  opacity: 0;
+}
+
+.fantastical .dot {
+  background-color: var(--blue-500);
+  position: relative;
+  width: 4px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.fantastical .day-4 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 600;
+  color: var(--white);
+  font-size: 11px;
+  text-align: center;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-dots-2 {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 2px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .dot-2 {
+  background-color: var(--purple-500);
+  position: relative;
+  width: 4px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.fantastical .dot-3 {
+  background-color: var(--teal-400);
+  position: relative;
+  width: 4px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.fantastical .frame-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  flex-grow: 1;
+}
+
+.fantastical .frame {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px;
+  position: relative;
+  flex: 0 0 auto;
+  background-color: var(--blue-500);
+  border-radius: 100px;
+}
+
+.fantastical .day-5 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 600;
+  color: var(--white);
+  font-size: 11px;
+  text-align: center;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .dot-4 {
+  background-color: var(--white);
+  position: relative;
+  width: 4px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.fantastical .days-wrapper {
+  position: relative;
+  width: 268px;
+  height: 552px;
+  overflow: hidden;
+  overflow-y: scroll;
+}
+
+.fantastical .days-wrapper::-webkit-scrollbar {
+  width: 0;
+  display: none;
+}
+
+.fantastical .days {
+  display: flex;
+  flex-direction: column;
+  width: 268px;
+  gap: 8px;
+  align-items: flex-start;
+  position: relative;
+}
+
+.fantastical .div-5 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.fantastical .div-6 {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 4px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .text-wrapper-3 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 700;
+  color: var(--blue-500);
+  font-size: 13px;
+  letter-spacing: 0;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.fantastical .element {
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 400;
+  color: var(--blue-500);
+  font-size: 13px;
+  letter-spacing: 0;
+  line-height: 20px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.fantastical .text-wrapper-4 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 700;
+  color: #ffffffb2;
+  font-size: 13px;
+  letter-spacing: 0;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.fantastical .text-wrapper-5 {
+  font-weight: 400;
+  color: #ffffffb2;
+  font-size: 13px;
+  line-height: 20px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.fantastical .all-day-event {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 0px 6px;
+  position: relative;
+  flex: 0 0 auto;
+  background-color: var(--purple-500);
+  border-radius: 6px;
+}
+
+.fantastical .text-wrapper-6 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: var(--text-sm-medium-font-family);
+  font-weight: var(--text-sm-medium-font-weight);
+  color: var(--white);
+  font-size: var(--text-sm-medium-font-size);
+  letter-spacing: var(--text-sm-medium-letter-spacing);
+  line-height: var(--text-sm-medium-line-height);
+  white-space: nowrap;
+  font-style: var(--text-sm-medium-font-style);
+}
+
+.fantastical .event {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.fantastical .meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.fantastical .ellipse-3 {
+  background-color: var(--blue-500);
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.fantastical .text-wrapper-7 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 600;
+  color: var(--gray-400);
+  font-size: 11px;
+  letter-spacing: 0;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.fantastical .text-wrapper-8 {
+  font-weight: 600;
+  color: var(--gray-400);
+  font-size: 10px;
+  line-height: 16px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.fantastical .video-camera-wrapper {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 2px;
+  position: relative;
+  flex: 0 0 auto;
+  background-color: var(--gray-400);
+  border-radius: 100px;
+}
+
+.fantastical .video-camera {
+  position: relative;
+  width: 8px;
+  height: 8px;
+}
+
+.fantastical .div-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 0px 0px 0px 20px;
+  align-self: stretch;
+  width: 100%;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .text-wrapper-9 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  margin-top: -1px;
+  font-family: var(--text-xs-medium-font-family);
+  font-weight: var(--text-xs-medium-font-weight);
+  color: var(--white);
+  font-size: var(--text-xs-medium-font-size);
+  letter-spacing: var(--text-xs-medium-letter-spacing);
+  line-height: var(--text-xs-medium-line-height);
+  font-style: var(--text-xs-medium-font-style);
+}
+
+.fantastical .text-wrapper-10 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 400;
+  color: var(--gray-400);
+  font-size: 11px;
+  letter-spacing: 0;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.fantastical .ellipse-4 {
+  background-color: var(--pink-500);
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.fantastical .ellipse-5 {
+  background-color: var(--amber-400);
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.fantastical .all-day-event-2 {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 0px 6px;
+  position: relative;
+  flex: 0 0 auto;
+  background-color: var(--green-500);
+  border-radius: 6px;
+}
+
+.fantastical .calendar-base {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: var(--calendar-left);
+  right: 0;
+  width: auto;
+  height: 100vh;
+  overflow: auto;
+  z-index: 10;
+}
+
+.fantastical .arrows {
+  gap: 1px;
+  display: inline-flex;
+  align-items: flex-start;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .icon-wrapper {
+  border-radius: 6px 0px 0px 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px;
+  position: relative;
+  flex: 0 0 auto;
+  background-color: var(--gray-100);
+}
+
+.fantastical .button {
+  all: unset;
+  box-sizing: border-box;
+  align-items: flex-start;
+  display: inline-flex;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .button-master {
+  padding: 6px 16px;
+  background-color: var(--gray-100);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .text {
+  font-weight: var(--text-xs-regular-font-weight);
+  color: var(--gray-900);
+  font-size: var(--text-xs-regular-font-size);
+  line-height: var(--text-xs-regular-line-height);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: var(--text-xs-regular-font-family);
+  letter-spacing: var(--text-xs-regular-letter-spacing);
+  white-space: nowrap;
+  font-style: var(--text-xs-regular-font-style);
+}
+
+.fantastical .img-wrapper {
+  border-radius: 0px 6px 6px 0px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px;
+  position: relative;
+  flex: 0 0 auto;
+  background-color: var(--gray-100);
+}
+
+.fantastical .button-master-2 {
+  align-items: center;
+  gap: 8px;
+  padding: 4px 16px;
+  border-radius: 8px;
+  display: inline-flex;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .text-2 {
+  font-weight: var(--text-sm-medium-font-weight);
+  color: var(--gray-500);
+  font-size: var(--text-sm-medium-font-size);
+  line-height: var(--text-sm-medium-line-height);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: var(--text-sm-medium-font-family);
+  letter-spacing: var(--text-sm-medium-letter-spacing);
+  white-space: nowrap;
+  font-style: var(--text-sm-medium-font-style);
+}
+
+.fantastical .button-master-3 {
+  padding: 4px 16px;
+  background-color: var(--red-600);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .field {
+  width: 184px;
+  align-items: flex-start;
+  display: flex;
+  position: relative;
+}
+
+.fantastical .field-master {
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  flex: 1;
+  flex-grow: 1;
+  background-color: var(-- gray-100);
+  border-radius: 4px;
+  display: flex;
+  position: relative;
+}
+
+
+
+.fantastical .search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  font-family: var(--text-xs-regular-font-family);
+  font-weight: var(--text-xs-regular-font-weight);
+  color: var(--gray-400);
+  font-size: var(--text-xs-regular-font-size);
+  letter-spacing: var(--text-xs-regular-letter-spacing);
+  line-height: var(--text-xs-regular-line-height);
+  font-style: var(--text-xs-regular-font-style);
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.fantastical .inner-stack {
+  display: inline-flex;
+  flex-direction: column;
+  height: 878px;
+  align-items: flex-start;
+  position: relative;
+  margin-bottom: -50px;
+  margin-right: -48px;
+}
+
+.fantastical .week-days {
+  display: flex;
+  width: 1108px;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 0px 0px 0px 48px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .day-6 {
+  display: flex;
+  flex-direction: column;
+  width: 144.57px;
+  align-items: flex-start;
+  padding: 4px 8px 16px;
+  position: relative;
+  background-color: var(--gray-50);
+  box-shadow: inset -1px -1px 0px #e0e0e0;
+}
+
+.fantastical .text-wrapper-11 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  margin-top: -1px;
+  font-family: "Inter", Helvetica;
+  font-weight: 700;
+  color: var(--gray-500);
+  font-size: 10px;
+  letter-spacing: 0;
+  line-height: 12px;
+}
+
+.fantastical .text-wrapper-12 {
+  align-self: stretch;
+  font-weight: 500;
+  color: #000000;
+  font-size: 22px;
+  line-height: 32px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+}
+
+.fantastical .day-7 {
+  display: flex;
+  flex-direction: column;
+  width: 144.57px;
+  padding: 4px 8px 16px;
+  background-color: var(--white);
+  box-shadow: inset -1px -1px 0px #e0e0e0;
+  align-items: flex-start;
+  position: relative;
+}
+
+.fantastical .day-8 {
+  display: flex;
+  flex-direction: column;
+  width: 144.57px;
+  align-items: flex-start;
+  padding: 4px 8px 16px;
+  position: relative;
+  background-color: var(--blue-50);
+  box-shadow: inset -1px -1px 0px #e0e0e0;
+}
+
+.fantastical .day-9 {
+  display: flex;
+  flex-direction: column;
+  width: 144.57px;
+  align-items: flex-start;
+  padding: 4px 8px 16px;
+  position: relative;
+  background-color: var(--gray-50);
+  box-shadow: inset 0px -1px 0px #e0e0e0;
+}
+
+.fantastical .EST-GMT {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  margin-top: -1px;
+  margin-right: -12px;
+  font-family: var(--text-xs-medium-font-family);
+  font-weight: var(--text-xs-medium-font-weight);
+  color: var(--gray-500);
+  font-size: var(--text-xs-medium-font-size);
+  letter-spacing: var(--text-xs-medium-letter-spacing);
+  line-height: var(--text-xs-medium-line-height);
+  font-style: var(--text-xs-medium-font-style);
+}
+
+.fantastical .hour-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.fantastical .time {
+  display: flex;
+  justify-content: center;
+  width: 36px;
+  margin-top: -1px;
+  font-family: var(--text-xs-medium-font-family);
+  font-weight: var(--text-xs-medium-font-weight);
+  color: var(--gray-500);
+  font-size: var(--text-xs-medium-font-size);
+  letter-spacing: var(--text-xs-medium-letter-spacing);
+  line-height: var(--text-xs-medium-line-height);
+  align-items: center;
+  position: relative;
+  font-style: var(--text-xs-medium-font-style);
+}
+
+.fantastical .blocks {
+  position: relative;
+  align-self: stretch;
+  flex: 0 0 auto;
+}
+
+.fantastical .hour-row-2 {
+  display: flex;
+  width: 1156px;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fantastical .event-2 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 196px;
+  left: 509px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .bar {
+  background-color: var(--lightblue-500);
+  position: relative;
+  align-self: stretch;
+  width: 3px;
+}
+
+.fantastical .body {
+  display: flex;
+  flex-direction: column;
+  height: 68px;
+  align-items: flex-start;
+  padding: 6px;
+  position: relative;
+  flex: 1;
+  flex-grow: 1;
+  border-radius: 4px;
+}
+
+.fantastical .time-2 {
+  display: flex;
+  gap: 4px;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+  align-items: center;
+  position: relative;
+}
+
+.fantastical .text-wrapper-13 {
+  width: fit-content;
+  margin-top: -1px;
+  font-weight: var(--text-xs-medium-font-weight);
+  color: var(--lightblue-700);
+  font-size: var(--text-xs-medium-font-size);
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--text-xs-medium-font-family);
+  letter-spacing: var(--text-xs-medium-letter-spacing);
+  line-height: var(--text-xs-medium-line-height);
+  font-style: var(--text-xs-medium-font-style);
+}
+
+.fantastical .frame-2 {
+  background-color: var(--lightblue-700);
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 2px;
+  position: relative;
+  flex: 0 0 auto;
+  border-radius: 100px;
+}
+
+.fantastical .end {
+  align-self: stretch;
+  font-weight: 600;
+  color: var(--lightblue-700);
+  font-size: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-3 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 266px;
+  left: 509px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-4 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 340px;
+  left: 509px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-5 {
+  display: flex;
+  width: 143px;
+  height: 140px;
+  align-items: flex-start;
+  position: absolute;
+  top: 412px;
+  left: 509px;
+  background-color: #8b5cf61a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .bar-2 {
+  background-color: var(--violet-500);
+  position: relative;
+  align-self: stretch;
+  width: 3px;
+}
+
+.fantastical .text-wrapper-14 {
+  width: fit-content;
+  margin-top: -1px;
+  font-weight: var(--text-xs-medium-font-weight);
+  color: var(--violet-700);
+  font-size: var(--text-xs-medium-font-size);
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--text-xs-medium-font-family);
+  letter-spacing: var(--text-xs-medium-letter-spacing);
+  line-height: var(--text-xs-medium-line-height);
+  font-style: var(--text-xs-medium-font-style);
+}
+
+.fantastical .end-2 {
+  align-self: stretch;
+  font-weight: 600;
+  color: var(--violet-700);
+  font-size: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-6 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 556px;
+  left: 509px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-7 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 556px;
+  left: 943px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .text-wrapper-15 {
+  width: fit-content;
+  margin-top: -1px;
+  font-weight: 500;
+  color: var(--lightblue-700);
+  font-size: 12px;
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-8 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 628px;
+  left: 509px;
+  background-color: #f59e0b1a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .bar-3 {
+  background-color: var(--amber-500);
+  position: relative;
+  align-self: stretch;
+  width: 3px;
+}
+
+.fantastical .text-wrapper-16 {
+  width: fit-content;
+  margin-top: -1px;
+  font-weight: var(--text-xs-medium-font-weight);
+  color: var(--amber-700);
+  font-size: var(--text-xs-medium-font-size);
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--text-xs-medium-font-family);
+  letter-spacing: var(--text-xs-medium-letter-spacing);
+  line-height: var(--text-xs-medium-line-height);
+  font-style: var(--text-xs-medium-font-style);
+}
+
+.fantastical .frame-3 {
+  background-color: var(--amber-700);
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 2px;
+  position: relative;
+  flex: 0 0 auto;
+  border-radius: 100px;
+}
+
+.fantastical .end-3 {
+  align-self: stretch;
+  font-weight: 600;
+  color: var(--amber-700);
+  font-size: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-9 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 628px;
+  left: 1087px;
+  background-color: #f59e0b1a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-10 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 772px;
+  left: 653px;
+  background-color: var(--rose-100);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .bar-4 {
+  background-color: var(--rose-500);
+  position: relative;
+  align-self: stretch;
+  width: 3px;
+}
+
+.fantastical .text-wrapper-17 {
+  width: fit-content;
+  margin-top: -1px;
+  font-weight: var(--text-xs-medium-font-weight);
+  color: var(--rose-700);
+  font-size: var(--text-xs-medium-font-size);
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--text-xs-medium-font-family);
+  letter-spacing: var(--text-xs-medium-letter-spacing);
+  line-height: var(--text-xs-medium-line-height);
+  font-style: var(--text-xs-medium-font-style);
+}
+
+.fantastical .frame-4 {
+  background-color: var(--rose-700);
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 2px;
+  position: relative;
+  flex: 0 0 auto;
+  border-radius: 100px;
+}
+
+.fantastical .end-4 {
+  align-self: stretch;
+  font-weight: 600;
+  color: var(--rose-700);
+  font-size: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-11 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 772px;
+  left: 1087px;
+  background-color: var(--rose-100);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-12 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 484px;
+  left: 653px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-13 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 484px;
+  left: 1087px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-14 {
+  display: flex;
+  width: 71px;
+  height: 142px;
+  align-items: flex-start;
+  position: absolute;
+  top: 268px;
+  left: 653px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .end-5 {
+  align-self: stretch;
+  margin-bottom: -23px;
+  font-weight: 600;
+  color: var(--lightblue-700);
+  font-size: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-15 {
+  display: flex;
+  width: 71px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 268px;
+  left: 725px;
+  background-color: #10b9811a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .bar-5 {
+  background-color: var(--emerald-500);
+  position: relative;
+  align-self: stretch;
+  width: 3px;
+}
+
+.fantastical .text-wrapper-18 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: -1px;
+  font-family: var(--text-xs-medium-font-family);
+  font-weight: var(--text-xs-medium-font-weight);
+  color: var(--emerald-700);
+  font-size: var(--text-xs-medium-font-size);
+  letter-spacing: var(--text-xs-medium-letter-spacing);
+  line-height: var(--text-xs-medium-line-height);
+  white-space: nowrap;
+  font-style: var(--text-xs-medium-font-style);
+}
+
+.fantastical .end-6 {
+  align-self: stretch;
+  font-weight: 600;
+  color: var(--emerald-700);
+  font-size: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .event-16 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 268px;
+  left: 798px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-17 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 268px;
+  left: 1087px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-18 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 412px;
+  left: 798px;
+  background-color: #8b5cf61a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .text-wrapper-19 {
+  width: fit-content;
+  margin-top: -1px;
+  font-weight: 500;
+  color: var(--violet-700);
+  font-size: 12px;
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", Helvetica;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+
+.fantastical .frame-5 {
+  background-color: var(--violet-700);
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 2px;
+  position: relative;
+  flex: 0 0 auto;
+  border-radius: 100px;
+}
+
+.fantastical .event-19 {
+  display: flex;
+  width: 143px;
+  height: 68px;
+  align-items: flex-start;
+  position: absolute;
+  top: 340px;
+  left: 943px;
+  background-color: #8b5cf61a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-20 {
+  display: flex;
+  width: 143px;
+  height: 142px;
+  align-items: flex-start;
+  position: absolute;
+  top: 628px;
+  left: 653px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fantastical .event-21 {
+  display: flex;
+  width: 143px;
+  height: 142px;
+  align-items: flex-start;
+  position: absolute;
+  top: 556px;
+  left: 798px;
+  background-color: #0ea5e91a;
+  border-radius: 4px;
+  overflow: hidden;
+}

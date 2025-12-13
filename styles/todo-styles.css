@@ -1,0 +1,327 @@
+/* Todo date title */
+.todo-date-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    margin: 12px 0 8px 0;
+    padding-left: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Today title special color */
+.todo-date-title[data-date-type="today"] {
+    color: #3B82F6;
+}
+
+/* Todo item styling */
+
+/* Progress section - fixed outside scroll */
+.progress-section {
+    /* margin-top: -30px; */
+    padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--gray-900);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* New progress charts section */
+.todo-progress-section {
+  padding: 24px 16px;
+  border-bottom: none;
+  background: #18181B;
+  margin-bottom: 4px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.progress-charts {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+}
+
+.progress-chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.progress-chart svg {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.progress-label {
+  text-align: center;
+}
+
+.progress-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.progress-stats {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Date headers for todo list */
+.date-header,
+.today-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  padding: 5px 15px 15px 15px;
+  height: 30px;
+  background-color: #2a2a2e;
+  
+}
+
+.date-header .text-wrapper-5,
+.today-header .text-wrapper-5,
+.date-header time,
+.today-header time {
+  margin: -1px 0 0 0 !important;
+}
+
+/* Special styling for today's date header */
+.today-header {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%);
+  border-left: 3px solid #3b82f6;
+
+}
+
+/* Empty state message */
+.no-todos-message {
+  padding: 40px 16px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  margin: 8px 0;
+}
+
+.no-todos-message p {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: 0.3px;
+}
+
+/* Progress circles */
+.progress-circles {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+.progress-circle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-circle svg {
+  flex-shrink: 0;
+}
+
+.progress-circle .progress-bar {
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.progress-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.progress-percent {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1;
+}
+
+.progress-label {
+  font-size: 9px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+/* Update days wrapper to accommodate new structure */
+.days-wrapper {
+  max-height: 600px;
+  display: flex;
+  flex-direction: column;
+}
+
+.days-wrapper .days {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.todo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+  width: 268px;
+  max-width: 268px;
+  overflow-x: hidden;
+}
+
+/* Remove the max-height and overflow from todo-list since it's now in .days */
+
+.todo-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 8px 12px 8px 20px;
+  cursor: grab;
+  transition: all 0.2s ease;
+  user-select: none;
+  width: 268px;
+  max-width: 268px;
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.todo-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+.todo-item:active {
+  cursor: grabbing;
+  transform: scale(0.98);
+}
+
+.todo-priority-circle {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.todo-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.todo-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.todo-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.todo-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.todo-category {
+  font-size: 8px;
+  font-weight: 600;
+  color: #A1A1AA;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.todo-duration {
+  font-size: 8px;
+  font-weight: 500;
+  color: #A1A1AA;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 3px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.todo-due-date {
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Drag feedback */
+.todo-item.dragging {
+  opacity: 0.5;
+  transform: rotate(2deg);
+}
+
+/* Custom scrollbar for todo list */
+.todo-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.todo-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+}
+
+.todo-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.todo-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Update the existing days section to accommodate todos */
+.days-wrapper {
+  max-height: 600px;
+}
+

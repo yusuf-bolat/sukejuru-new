@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Calendar</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #121212;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .calendar {
+      width: 320px;
+      background: #1e1e1e;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .calendar-header h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      text-align: center;
+    }
+
+    .day-name {
+      font-size: 12px;
+      opacity: 0.6;
+    }
+
+    .day {
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 14px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .day:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .today {
+      background: #1a73e8;
+      color: white;
+      font-weight: bold;
+    }
+
+    .event-day {
+      background: rgba(26, 115, 232, 0.2);
+      color: #1a73e8;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="calendar">
+    <div class="calendar-header">
+      <button onclick="prevMonth()">◀</button>
+      <h2 id="month-year"></h2>
+      <button onclick="nextMonth()">▶</button>
+    </div>
+    <div class="calendar-grid" id="calendar-grid">
+      <!-- Days dynamically injected -->
+    </div>
+  </div>
+
+  <script>
+    const monthYear = document.getElementById('month-year');
+    const grid = document.getElementById('calendar-grid');
+
+    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    let today = new Date();
+    let currentMonth = today.getMonth();
+    let currentYear = today.getFullYear();
+
+    function renderCalendar(month, year) {
+      grid.innerHTML = '';
+      monthYear.textContent = new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+      // Day names
+      dayNames.forEach(d => {
+        const div = document.createElement('div');
+        div.textContent = d;
+        div.className = 'day-name';
+        grid.appendChild(div);
+      });
+
+      let firstDay = new Date(year, month, 1).getDay();
+      let daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      // Empty cells before start
+      for (let i = 0; i < firstDay; i++) {
+        grid.appendChild(document.createElement('div'));
+      }
+
+      // Days
+      for (let d = 1; d <= daysInMonth; d++) {
+        const div = document.createElement('div');
+        div.textContent = d;
+        div.className = 'day';
+
+        if (d === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+          div.classList.add('today');
+        }
+
+        // Example: mark event days (like 5th, 12th)
+        if ([5, 12, 20].includes(d)) {
+          div.classList.add('event-day');
+        }
+
+        grid.appendChild(div);
+      }
+    }
+
+    function prevMonth() {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar(currentMonth, currentYear);
+    }
+
+    function nextMonth() {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar(currentMonth, currentYear);
+    }
+
+    renderCalendar(currentMonth, currentYear);
+  </script>
+</body>
+</html>

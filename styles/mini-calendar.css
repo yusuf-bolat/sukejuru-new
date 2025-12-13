@@ -1,0 +1,222 @@
+/* Mini month calendar: precise styling to match the reference image */
+
+/* Hide static calendar markup when JS replaces it */
+section.mini-calendar .div-4,
+section.mini-calendar .day-header,
+section.mini-calendar .day-2,
+section.mini-calendar .day-3,
+section.mini-calendar .day-4,
+section.mini-calendar .day-5 {
+  display: none !important;
+}
+
+#mini-calendar {
+  background: #1f1f1f; /* slightly lighter than sidebar to match screenshot */
+}
+/* FullCalendar legacy block (kept for safety if still present); otherwise custom styles below apply */
+#mini-calendar .fc {
+  font-size: 12px;
+  --mini-fg: rgba(255,255,255,0.88);
+  --mini-muted: rgba(255,255,255,0.60);
+  --mini-dim: rgba(255,255,255,0.35);
+  --mini-border: rgba(255,255,255,0.08);
+  --mini-accent: #3b82f6; /* blue for "today" bubble */
+}
+
+/* Header: weekday names (SUN, MON...) */
+#mini-calendar .fc .fc-col-header,
+#mini-calendar .fc .fc-col-header-cell {
+  background: #1f1f1f !important;
+  border: none !important;
+}
+#mini-calendar .fc .fc-col-header-cell-cushion {
+  color: var(--mini-muted) !important;
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  padding: 8px 8px 4px 8px !important;
+  text-transform: uppercase;
+}
+
+/* Grid: very subtle separators */
+#mini-calendar .fc .fc-scrollgrid,
+#mini-calendar .fc .fc-daygrid,
+#mini-calendar .fc .fc-daygrid-body,
+#mini-calendar .fc .fc-daygrid-day,
+#mini-calendar .fc .fc-daygrid-day-frame {
+  border-color: var(--mini-border) !important;
+}
+
+/* Day number: small circle; left aligned inside the cell */
+#mini-calendar .fc .fc-daygrid-day-top {
+  padding: 6px 6px 0 6px !important;
+  justify-content: flex-start !important;
+}
+#mini-calendar .fc .fc-daygrid-day-number {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  line-height: 24px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--mini-fg) !important;
+  text-decoration: none !important;
+}
+/* Today bubble */
+#mini-calendar .fc .fc-day-today .fc-daygrid-day-number {
+  background: var(--mini-accent) !important;
+  color: #fff !important;
+}
+/* Non-current month days dimmed */
+#mini-calendar .fc .fc-day-other .fc-daygrid-day-number {
+  color: var(--mini-dim) !important;
+}
+
+/* Event dots row under the number */
+#mini-calendar .fc .fc-daygrid-day-events {
+  margin-top: 2px;
+  padding: 2px 0 6px 0;
+  min-height: 12px; /* reserve space for dots */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+/* Render each event as a tiny colored dot */
+#mini-calendar .fc .fc-daygrid-event {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  display: inline-block !important;
+  overflow: hidden !important;
+}
+/* Hide default event text/frames to keep only dots */
+#mini-calendar .fc .fc-daygrid-event .fc-event-main,
+#mini-calendar .fc .fc-daygrid-event .fc-event-time,
+#mini-calendar .fc .fc-daygrid-event .fc-event-title {
+  display: none !important;
+}
+/* Dots for non-current month should also dim */
+#mini-calendar .fc .fc-day-other .fc-daygrid-event {
+  opacity: 0.4;
+}
+
+/* "+N more" link style */
+#mini-calendar .fc .fc-daygrid-more-link {
+  color: var(--mini-muted) !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  text-decoration: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Buttons inside mini calendar (if any are shown) */
+#mini-calendar .fc .fc-button-primary {
+  background: #2b2b2b !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+/* ================= Custom mini calendar (non-FullCalendar) ================= */
+#mini-calendar {
+  --mini-fg: rgba(255,255,255,0.95);
+  --mini-muted: rgba(255,255,255,0.50);
+  --mini-dim: rgba(255,255,255,0.30);
+  --mini-border: rgba(255,255,255,0.08);
+  --mini-accent: #3b82f6;
+  background: transparent;
+  padding: 0;
+  width: 268px;
+  height: 188px;
+  overflow: hidden;
+}
+
+#mini-calendar .mini-grid {
+  display: grid;
+  grid-template-columns: repeat(7, calc(268px / 7));
+  gap: 0;
+  width: 268px;
+}
+
+#mini-calendar .mini-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1px;
+  min-height: 26px;
+  width: calc(268px / 7);
+  box-sizing: border-box;
+}
+
+#mini-calendar .mini-day-name {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: var(--mini-muted);
+  text-align: center;
+  padding: 4px 0;
+  text-transform: uppercase;
+}
+
+#mini-calendar .mini-empty { height: 0; }
+
+#mini-calendar .mini-day {
+  height: 20px;
+  width: 20px;
+  margin: 0;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--mini-fg);
+  font-weight: 600;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+#mini-calendar .mini-day:hover { 
+  background: rgba(255,255,255,0.08); 
+}
+
+#mini-calendar .mini-day.today {
+  background: var(--mini-accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+#mini-calendar .mini-dim { 
+  opacity: 0.3; 
+}
+
+#mini-calendar .mini-dots {
+  display: flex;
+  gap: 2px;
+  height: 5px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  flex-wrap: wrap;
+  max-width: 20px;
+}
+
+#mini-calendar .mini-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Remove default focus ring on tiny buttons to match visual; keep subtle hover only */
+#mini-calendar .mini-day:focus { outline: none; }
