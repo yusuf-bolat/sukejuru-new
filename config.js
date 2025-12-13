@@ -1,18 +1,30 @@
 // Load environment variables
 // This file should be loaded before supabase-client.js
 
-window.ENV = {
-  SUPABASE_URL: '',
-  SUPABASE_ANON_KEY: '',
-  OPENAI_API_KEY: ''
-};
+// Initialize if not already set by env-config.js
+if (!window.ENV) {
+  window.ENV = {
+    SUPABASE_URL: '',
+    SUPABASE_ANON_KEY: '',
+    OPENAI_API_KEY: ''
+  };
+}
 
-window.envLoaded = false;
+if (window.envLoaded !== true) {
+  window.envLoaded = false;
+}
 
-// Try to load from .env.local (local development) or use injected values (production)
+// Only load .env.local if env-config.js didn't already set the values
 async function loadEnv() {
+  // Check if env-config.js already loaded (production)
+  if (window.ENV.SUPABASE_URL && window.ENV.SUPABASE_URL !== '' && window.ENV.SUPABASE_URL !== '__SUPABASE_URL__') {
+    console.log('✓ Environment variables loaded from build (production)');
+    window.envLoaded = true;
+    return;
+  }
+
+  // Try to load from .env.local (local development only)
   try {
-    // Try to fetch .env.local file (works locally)
     const response = await fetch('.env.local');
     
     if (response.ok) {
@@ -28,19 +40,15 @@ async function loadEnv() {
           }
         }
       });
-      console.log('Environment variables loaded from .env.local');
-    } else {
-      // Production: Load from injected script (Vercel/Heroku environment variables)
-      // These will be set by the deployment platform
-      console.log('Loading environment variables from deployment platform');
+      console.log('✓ Environment variables loaded from .env.local (development)');
     }
-    
-    window.envLoaded = true;
-    console.log('Supabase URL configured:', window.ENV.SUPABASE_URL ? 'Yes' : 'No');
   } catch (err) {
-    console.log('Using environment variables from deployment platform');
-    window.envLoaded = true;
+    console.warn('⚠ Could not load .env.local - using environment variables from deployment');
   }
+  
+  window.envLoaded = true;
+  console.log('Supabase URL configured:', window.ENV.SUPABASE_URL ? 'Yes' : 'No');
+  console.log('OpenAI Key configured:', window.ENV.OPENAI_API_KEY ? 'Yes' : 'No');
 }
 
 // Load immediately
