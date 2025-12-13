@@ -1,0 +1,7 @@
+{
+  "buildCommand": "node build.js",
+  "devCommand": "npx serve .",
+  "installCommand": "npm install",
+  "framework": null,
+  "outputDirectory": "."
+}

@@ -1,4 +1,4 @@
-// Load environment variables from .env.local
+// Load environment variables
 // This file should be loaded before supabase-client.js
 
 window.ENV = {
@@ -9,28 +9,37 @@ window.ENV = {
 
 window.envLoaded = false;
 
-// Fetch and parse .env.local file
+// Try to load from .env.local (local development) or use injected values (production)
 async function loadEnv() {
   try {
+    // Try to fetch .env.local file (works locally)
     const response = await fetch('.env.local');
-    const text = await response.text();
-    const lines = text.split('\n');
-    lines.forEach(line => {
-      const trimmed = line.trim();
-      if (trimmed && !trimmed.startsWith('#')) {
-        const [key, ...valueParts] = trimmed.split('=');
-        const value = valueParts.join('=').trim();
-        if (key && value) {
-          window.ENV[key.trim()] = value;
+    
+    if (response.ok) {
+      const text = await response.text();
+      const lines = text.split('\n');
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.startsWith('#')) {
+          const [key, ...valueParts] = trimmed.split('=');
+          const value = valueParts.join('=').trim();
+          if (key && value) {
+            window.ENV[key.trim()] = value;
+          }
         }
-      }
-    });
+      });
+      console.log('Environment variables loaded from .env.local');
+    } else {
+      // Production: Load from injected script (Vercel/Heroku environment variables)
+      // These will be set by the deployment platform
+      console.log('Loading environment variables from deployment platform');
+    }
+    
     window.envLoaded = true;
-    console.log('Environment variables loaded successfully');
-    console.log('Supabase URL:', window.ENV.SUPABASE_URL);
+    console.log('Supabase URL configured:', window.ENV.SUPABASE_URL ? 'Yes' : 'No');
   } catch (err) {
-    console.error('Failed to load .env.local:', err);
-    window.envLoaded = true; // Mark as loaded even on error to unblock
+    console.log('Using environment variables from deployment platform');
+    window.envLoaded = true;
   }
 }
 

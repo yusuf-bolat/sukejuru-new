@@ -16,6 +16,9 @@
 	<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
 	<!-- Supabase JS Client -->
 	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+	<!-- Environment configuration (production) or config.js (development) -->
+	<script src="env-config.js" onerror="console.log('Using config.js for environment')"></script>
+	<script src="config.js"></script>
 <!-- cache-bust style.css so edits show immediately -->
 <link rel="stylesheet" href="styles/style.css?v=dev" />
 <!-- Mini calendar overrides (loaded last to win cascade) -->
@@ -632,8 +635,7 @@
 </main>
 <!-- FullCalendar JS -->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-<!-- Configuration and Supabase client -->
-<script src="config.js"></script>
+<!-- Supabase client (config already loaded in head) -->
 <script src="supabase-client.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
