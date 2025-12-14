@@ -11,7 +11,7 @@ body, .fantastical, .fantastical * {
 }
 
 .fantastical {
-  background-color: #18181B;
+  background-color: #ffffff;
   overflow: hidden; /* container doesn't scroll */
   width: 100%;
   min-width: 320px; /* allow responsiveness while keeping a reasonable minimum */
@@ -268,7 +268,7 @@ button:focus,
   color: rgba(255, 255, 255, 0.8) !important;
 }
 
-.fc .fc-button-group .fc-button.fc-button-active {
+.fc .fc-button-group .fc-button .fc-button-active {
   background: #ef4444 !important;
   border-color: #ef4444 !important;
   color: #ffffff !important;
@@ -294,6 +294,7 @@ button:focus,
 .fantastical .img-wrapper {
   height: 32px !important;
   box-sizing: border-box !important;
+  background-color: #232324 !important;
 }
 
 /* Make sure the calendar content doesn't leave an accidental gap on the right */
@@ -909,7 +910,7 @@ input:checked + .toggle-label:before {
 }
 
 .fantastical .dot-4 {
-  background-color: #27272A;
+  background-color: var(--white);
   position: relative;
   width: 4px;
   height: 4px;
@@ -1046,8 +1047,8 @@ input:checked + .toggle-label:before {
 #calendar .fc .fc-timegrid-slot,
 #calendar .fc .fc-timegrid-slot-lane,
 #calendar .fc .fc-timegrid-axis-cushion {
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  color: inherit;
+  border-color: #353535 !important;
+  
 }
 
 /* Ensure vertical separators also use the same subtle color */
@@ -1388,6 +1389,7 @@ input:checked + .toggle-label:before {
 }
 
 .fantastical .calendar-base {
+  background-color: #18181A !important;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -1404,6 +1406,32 @@ input:checked + .toggle-label:before {
   transition: all 0.3s ease;
 }
 
+
+/* fc-timeGridWeek-view fc-view fc-timegrid class's table width adjustment */
+table {
+  border-color: #353535 !important;
+}
+
+th {
+  border: 1px solid #353535 !important; 
+  background-color: #18181A !important;/* change color as needed */
+}
+
+td {
+  border: 1px solid #353535 !important; /* change color as needed */
+}
+
+.fc-custom-day-name {
+  background-color: #18181A !important; /* change color as needed */
+
+}
+.fc-custom-day-num {
+  background-color: #18181A !important; /* change color as needed */
+}
+
+.fc-event-main {
+  border: none !important;
+}
 /* Smooth transitions for FullCalendar column width changes */
 #calendar .fc-col-header-cell,
 #calendar .fc-daygrid-day,
@@ -1463,6 +1491,7 @@ input:checked + .toggle-label:before {
   position: relative;
   flex: 0 0 auto;
   background-color: var(--gray-100);
+  background-color: #232324 !important;
 }
 
 .fantastical .button {
@@ -1482,6 +1511,30 @@ input:checked + .toggle-label:before {
   gap: 8px;
   position: relative;
   flex: 0 0 auto;
+}
+
+.fantastical .button-master .text {
+  color: #ffffff !important;
+}
+
+/*i want change color of ID #logout-btn*/
+
+#logout-btn  {
+  color: #ffffff !important;
+  background-color: #18181A !important;
+}
+#add-todo-btn  {
+  color: #ffffff !important;
+  background-color: #18181A !important;
+}
+
+#calendar {
+  background-color: #18181B !important;
+}
+
+.fc-custom-day-name, .fc-custom-day-num {
+  color: #ffffff !important;
+
 }
 
 .fantastical .text {
@@ -1662,7 +1715,7 @@ input:checked + .toggle-label:before {
   padding: 4px 8px 16px;
   position: relative;
   background-color: var(--gray-50);
-  box-shadow: inset -1px -1px 0px #3F3F46;
+  box-shadow: inset -1px -1px 0px #e0e0e0;
 }
 
 .fantastical .text-wrapper-11 {
@@ -1699,8 +1752,8 @@ input:checked + .toggle-label:before {
   flex-direction: column;
   width: 144.57px;
   padding: 4px 8px 16px;
-  background-color: #27272A;
-  box-shadow: inset -1px -1px 0px #3F3F46;
+  background-color: var(--white);
+  box-shadow: inset -1px -1px 0px #e0e0e0;
   align-items: flex-start;
   position: relative;
 }
@@ -1713,7 +1766,7 @@ input:checked + .toggle-label:before {
   padding: 4px 8px 16px;
   position: relative;
   background-color: var(--blue-50);
-  box-shadow: inset -1px -1px 0px #3F3F46;
+  box-shadow: inset -1px -1px 0px #e0e0e0;
 }
 
 .fantastical .day-9 {
@@ -2653,7 +2706,7 @@ input:checked + .toggle-label:before {
 }
 
 .fantastical {
-  background-color: #18181B;
+  background-color: #ffffff;
   overflow: hidden;
   width: 100%;
   min-width: 320px;
@@ -2975,7 +3028,7 @@ input:checked + .toggle-label:before {
 }
 
 .fantastical .dot-4 {
-  background-color: #27272A;
+  background-color: var(--white);
   position: relative;
   width: 4px;
   height: 4px;
@@ -3451,7 +3504,7 @@ input:checked + .toggle-label:before {
   padding: 4px 8px 16px;
   position: relative;
   background-color: var(--gray-50);
-  box-shadow: inset -1px -1px 0px #3F3F46;
+  box-shadow: inset -1px -1px 0px #e0e0e0;
 }
 
 .fantastical .text-wrapper-11 {
@@ -3488,8 +3541,8 @@ input:checked + .toggle-label:before {
   flex-direction: column;
   width: 144.57px;
   padding: 4px 8px 16px;
-  background-color: #27272A;
-  box-shadow: inset -1px -1px 0px #3F3F46;
+  background-color: var(--white);
+  box-shadow: inset -1px -1px 0px #e0e0e0;
   align-items: flex-start;
   position: relative;
 }
@@ -3502,7 +3555,7 @@ input:checked + .toggle-label:before {
   padding: 4px 8px 16px;
   position: relative;
   background-color: var(--blue-50);
-  box-shadow: inset -1px -1px 0px #3F3F46;
+  box-shadow: inset -1px -1px 0px #e0e0e0;
 }
 
 .fantastical .day-9 {
@@ -4136,3 +4189,15 @@ input:checked + .toggle-label:before {
   border-radius: 4px;
   overflow: hidden;
 }
+
+/* Force navigation button colors */
+.fc .fc-toolbar.fc-header-toolbar .fc-toolbar-chunk button.fc-button,
+.fc .fc-toolbar.fc-header-toolbar button.fc-button-primary,
+.fc button.fc-prev-button,
+.fc button.fc-next-button,
+.fc button.fc-today-button {
+  background-color: #232324 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
